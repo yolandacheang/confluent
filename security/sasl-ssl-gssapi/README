@@ -1,0 +1,11 @@
+# Kerberos image needs to be manually built
+Run in kerberos folder
+docker build -t confluentinc/cp-kerberos:5.1.0 kerberos
+
+# Create kerberos container
+docker-compose create
+
+# Start all containers
+docker-compose start
+
+
