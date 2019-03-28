@@ -2,7 +2,7 @@
 version: '2'
 services:
   zookeeper1:
-    image: confluentinc/cp-zookeeper:5.0.1
+    image: confluentinc/cp-zookeeper:$TAG
     container_name: zookeeper1
     ports:
       - "22181:22181"
@@ -15,7 +15,7 @@ services:
       ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
 
   zookeeper2:
-    image: confluentinc/cp-zookeeper:5.0.1
+    image: confluentinc/cp-zookeeper:$TAG
     container_name: zookeeper2
     ports:
       - "32181:32181"
@@ -28,7 +28,7 @@ services:
       ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
 
   zookeeper3:
-    image: confluentinc/cp-zookeeper:5.0.1
+    image: confluentinc/cp-zookeeper:$TAG
     container_name: zookeeper3
     ports:
       - "42181:42181"
@@ -41,7 +41,7 @@ services:
       ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
 
   kafka1:
-    image: confluentinc/cp-enterprise-kafka:5.0.1
+    image: confluentinc/cp-enterprise-kafka:$TAG
     container_name: kafka1
     depends_on:
       - zookeeper1
@@ -69,7 +69,7 @@ services:
       - ${PWD}/secrets:/etc/kafka/secrets
 
   kafka2:
-    image: confluentinc/cp-enterprise-kafka:5.0.1
+    image: confluentinc/cp-enterprise-kafka:$TAG
     container_name: kafka2
     depends_on:
       - zookeeper1
@@ -97,7 +97,7 @@ services:
       - ${PWD}/secrets:/etc/kafka/secrets
 
   kafka3:
-    image: confluentinc/cp-enterprise-kafka:5.0.1
+    image: confluentinc/cp-enterprise-kafka:$TAG
     container_name: kafka3
     depends_on:
       - zookeeper1
@@ -125,7 +125,7 @@ services:
       - ${PWD}/secrets:/etc/kafka/secrets
 
   control-center:
-    image: confluentinc/cp-enterprise-control-center:5.0.1
+    image: confluentinc/cp-enterprise-control-center:$TAG
     container_name: control-center
     restart: always
     depends_on:
