@@ -1,0 +1,87 @@
+---
+version: '2.3'
+services:
+  ldap:
+    image: osixia/openldap:1.2.3
+    hostname: ldap
+    container_name: ldap
+    environment:
+      LDAP_ORGANISATION: "Confluent"
+      LDAP_DOMAIN: "confluent.io"
+    ports:
+      - "389:389"
+      - "636:636"
+    volumes:
+      - "$PWD/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom"
+    command: "--copy-service"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    volumes:
+      - $PWD/security:/security
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      KAFKA_OPTS: -Djava.security.auth.login.config=/security/zookeeper_jaas.conf
+         -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+         -Dzookeeper.requireClientAuthScheme=sasl
+
+  acl-ldap-authorizer:
+    image: customised/acl-ldap-authorizer:1.0
+    build: ./acl
+    hostname: acl
+    container_name: acl
+    depends_on:
+      - zookeeper
+    volumes:
+      - $PWD/security:/security
+    environment:
+      KAFKA_OPTS: -Djava.security.auth.login.config=/security/kafka_jaas.conf
+
+  kafka:
+    image: confluentinc/cp-enterprise-kafka:$TAG
+    hostname: kafka
+    container_name: kafka
+    restart: always
+    ports:
+      - "9093:9093"
+    depends_on:
+      - zookeeper
+    volumes:
+      - $PWD/plugins:/plugins
+      - $PWD/security:/security
+    environment:
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ADVERTISED_LISTENERS: SASL_PLAINTEXT://kafka:9093
+      KAFKA_LISTENERS: SASL_PLAINTEXT://:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SASL_PLAINTEXT
+      CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
+      KAFKA_AUTHORIZER_CLASS_NAME: io.confluent.kafka.security.ldap.authorizer.LdapAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: 'false'
+      KAFKA_SUPER_USERS: User:kafka
+      KAFKA_LDAP_AUTHORIZER_JAVA_NAMING_PROVIDER_URL: ldap://ldap:389/DC=CONFLUENT,DC=IO
+      KAFKA_LDAP_AUTHORIZER_REFRESH_INTERVAL_MS: 60000
+      KAFKA_LDAP_AUTHORIZER_JAVA_NAMING_SECURITY_AUTHENTICATION: SIMPLE
+      KAFKA_LDAP_AUTHORIZER_JAVA_NAMING_SECURITY_PRINCIPAL: cn=admin,dc=confluent,dc=io
+      KAFKA_LDAP_AUTHORIZER_JAVA_NAMING_SECURITY_CREDENTIALS: admin
+      KAFKA_LDAP_AUTHORIZER_GROUP_SEARCH_BASE: ou=groups
+      KAFKA_LDAP_AUTHORIZER_GROUP_NAME_ATTRIBUTE_PATTERN: 
+      KAFKA_LDAP_AUTHORIZER_GROUP_NAME_ATTRIBUTE: cn
+      KAFKA_LDAP_AUTHORIZER_GROUP_MEMBER_ATTRIBUTE: memberUid
+      KAFKA_LDAP_AUTHORIZER_GROUP_MEMBER_ATTRIBUTE_PATTERN: cn=(.*),ou=users,dc=confluent,dc=io
+      KAFKA_LDAP_AUTHORIZER_GROUP_OBJECT_CLASS: posixGroup
+      KAFKA_LDAP_AUTHORIZER_GROUP_SEARCH_SCOPE: 2
+      KAFKA_LOG4J_ROOT_LOGLEVEL: DEBUG
+      CLASSPATH: /plugins/ldap-plugins-5.1.0.jar
+      KAFKA_OPTS: -Djava.security.auth.login.config=/security/kafka_jaas.conf

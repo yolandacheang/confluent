@@ -114,11 +114,6 @@ services:
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
       CONTROL_CENTER_LOG4J_ROOT_LOGLEVEL: DEBUG
-      CONTROL_CENTER_AUTH_RESTRICTED_ROLES: Restricted
-      CONTROL_CENTER_REST_AUTHENTICATION_ROLES: Administrators,Restricted
-      CONTROL_CENTER_REST_AUTHENTICATION_REALM: c3
-      CONTROL_CENTER_REST_AUTHENTICATION_METHOD: BASIC
-      CONTROL_CENTER_OPTS: "-Djava.security.auth.login.config=/etc/kafka/secrets/propertyfile.jaas"
 
   ksql-server:
     image: confluentinc/cp-ksql-server:$TAG
@@ -142,10 +137,6 @@ services:
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
-      KSQL_OPTS: -Djava.security.auth.login.config=/jaas/jaas_config.file
-        -Dauthentication.method=BASIC
-        -Dauthentication.roles=admin
-        -Dauthentication.realm=KsqlServer-Props
 
   ksql-cli:
     image: confluentinc/cp-ksql-cli:$TAG
