@@ -1,7 +1,6 @@
 Kafka using LDAP authorizer
 
-We have a ldap container that has 3 users - alice, barnie, charlie.  Only alice and barnie are in LDAP group "Kafka Developers"
-ACLs will be setup to allow LDAP Group "Kafka Developers" only
+We have a ldap container that has 3 users - alice, barnie, charlie.  Only alice and barnie are in LDAP group "Kafka Developers".  ACLs has been setup to allow LDAP Group "Kafka Developers" only on topic "test-topic"
 
 1.Start all containers
 ```
