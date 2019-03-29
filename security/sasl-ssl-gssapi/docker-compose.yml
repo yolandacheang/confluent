@@ -27,7 +27,7 @@ services:
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/zookeeper_1_jaas.conf
         -Djava.security.krb5.conf=/etc/kafka/secrets/krb.conf
         -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
-        -Dsun.security.krb5.debug=true
+#        -Dsun.security.krb5.debug=true
     volumes:
     - $PWD/secrets:/etc/kafka/secrets
     network_mode: host
@@ -47,7 +47,7 @@ services:
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/zookeeper_2_jaas.conf
         -Djava.security.krb5.conf=/etc/kafka/secrets/krb.conf
         -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
-        -Dsun.security.krb5.debug=true
+#        -Dsun.security.krb5.debug=true
     volumes:
     - $PWD/secrets:/etc/kafka/secrets
     network_mode: host
@@ -67,13 +67,14 @@ services:
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/zookeeper_3_jaas.conf
         -Djava.security.krb5.conf=/etc/kafka/secrets/krb.conf
         -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
-        -Dsun.security.krb5.debug=true
+#        -Dsun.security.krb5.debug=true
     volumes:
     - $PWD/secrets:/etc/kafka/secrets
     network_mode: host
 
   kafka1:
     image: confluentinc/cp-enterprise-kafka:$TAG
+    hostname: kafka1
     network_mode: host
     depends_on:
       - zookeeper1
@@ -86,22 +87,40 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: quickstart.confluent.io:22181,quickstart.confluent.io:32181,quickstart.confluent.io:42181
       KAFKA_ADVERTISED_LISTENERS: SASL_SSL://quickstart.confluent.io:19094,PLAINTEXT://quickstart.confluent.io:9091
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASL_SSL:SASL_SSL,PLAINTEXT:PLAINTEXT
-      KAFKA_SSL_KEYSTORE_FILENAME: kafka.broker1.keystore.jks
-      KAFKA_SSL_KEYSTORE_CREDENTIALS: broker1_keystore_creds
-      KAFKA_SSL_KEY_CREDENTIALS: broker1_sslkey_creds
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka1.keystore.jks
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka1_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka1_sslkey_creds
       KAFKA_SSL_CLIENT_AUTH: requested
-      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.broker1.truststore.jks
-      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: broker1_truststore_creds
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka1.truststore.jks
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka1_truststore_creds
       KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SASL_SSL
-      KAFKA_METRICS_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "quickstart.confluent.io:9091"
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "quickstart.confluent.io:19094"
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_SSL
+      CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: com.sun.security.auth.module.Krb5LoginModule required \
+         useKeyTab=true \
+         storeKey=true \
+         keyTab="/etc/kafka/secrets/saslproducer.keytab" \
+         principal="saslproducer/quickstart.confluent.io@TEST.CONFLUENT.IO";
+      CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: GSSAPI
+      CONFLUENT_METRICS_REPORTER_SASL_KERBEROS_SERVICE_NAME: kafka
+      CONFLUENT_METRICS_REPORTER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/client.truststore.jks
+      CONFLUENT_METRICS_REPORTER_SSL_TRUSTSTORE_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/client.keystore.jks
+      CONFLUENT_METRICS_REPORTER_SSL_KEYSTORE_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_SSL_KEY_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 3
+      CONFLUENT_METRICS_REPORTER_MAX_REQUEST_SIZE: 10485760
+      # To avoid race condition with control-center
+      CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: "false"
       KAKFA_AUTHORIZER_CLASS_NAME: kafka.security.auth.SimpleAclAuthorizer
       KAFKA_SUPER_USERS: User:kafka
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: GSSAPI
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: " "
       KAFKA_SASL_ENABLED_MECHANISMS: GSSAPI
       KAFKA_SASL_KERBEROS_SERVICE_NAME: kafka
-      KAFKA_LOG4J_ROOT_LOGLEVEL: DEBUG
+#      KAFKA_LOG4J_ROOT_LOGLEVEL: DEBUG
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker1_jaas.conf
         -Djava.security.krb5.conf=/etc/kafka/secrets/krb.conf
         -Dsun.security.krb5.debug=true
@@ -110,6 +129,7 @@ services:
 
   kafka2:
     image: confluentinc/cp-enterprise-kafka:$TAG
+    hostname: kafka2
     network_mode: host
     depends_on:
       - zookeeper1
@@ -122,14 +142,32 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: quickstart.confluent.io:22181,quickstart.confluent.io:32181,quickstart.confluent.io:42181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASL_SSL:SASL_SSL,PLAINTEXT:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: SASL_SSL://quickstart.confluent.io:29094,PLAINTEXT://quickstart.confluent.io:9092
-      KAFKA_SSL_KEYSTORE_FILENAME: kafka.broker2.keystore.jks
-      KAFKA_SSL_KEYSTORE_CREDENTIALS: broker2_keystore_creds
-      KAFKA_SSL_KEY_CREDENTIALS: broker2_sslkey_creds
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka2.keystore.jks
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka2_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka2_sslkey_creds
       KAFKA_SSL_CLIENT_AUTH: requested
-      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.broker2.truststore.jks
-      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: broker2_truststore_creds
-      KAFKA_METRICS_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "quickstart.confluent.io:9092"
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka2.truststore.jks
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka2_truststore_creds
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "quickstart.confluent.io:29094"
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_SSL
+      CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: com.sun.security.auth.module.Krb5LoginModule required \
+         useKeyTab=true \
+         storeKey=true \
+         keyTab="/etc/kafka/secrets/saslproducer.keytab" \
+         principal="saslproducer/quickstart.confluent.io@TEST.CONFLUENT.IO";
+      CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: GSSAPI
+      CONFLUENT_METRICS_REPORTER_SASL_KERBEROS_SERVICE_NAME: kafka
+      CONFLUENT_METRICS_REPORTER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/client.truststore.jks
+      CONFLUENT_METRICS_REPORTER_SSL_TRUSTSTORE_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/client.keystore.jks
+      CONFLUENT_METRICS_REPORTER_SSL_KEYSTORE_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_SSL_KEY_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 3
+      CONFLUENT_METRICS_REPORTER_MAX_REQUEST_SIZE: 10485760
+      # To avoid race condition with control-center
+      CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: "false"
       KAKFA_AUTHORIZER_CLASS_NAME: kafka.security.auth.SimpleAclAuthorizer
       KAFKA_SUPER_USERS: User:kafka
       KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SASL_SSL
@@ -137,7 +175,7 @@ services:
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: " "
       KAFKA_SASL_ENABLED_MECHANISMS: GSSAPI
       KAFKA_SASL_KERBEROS_SERVICE_NAME: kafka
-      KAFKA_LOG4J_ROOT_LOGLEVEL: DEBUG
+#      KAFKA_LOG4J_ROOT_LOGLEVEL: DEBUG
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker2_jaas.conf
         -Djava.security.krb5.conf=/etc/kafka/secrets/krb.conf
         -Dsun.security.krb5.debug=true
@@ -146,6 +184,7 @@ services:
 
   kafka3:
     image: confluentinc/cp-enterprise-kafka:$TAG
+    hostname: kafka3
     network_mode: host
     depends_on:
       - zookeeper1
@@ -157,14 +196,32 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: quickstart.confluent.io:22181,quickstart.confluent.io:32181,quickstart.confluent.io:42181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASL_SSL:SASL_SSL,PLAINTEXT:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: SASL_SSL://quickstart.confluent.io:39094,PLAINTEXT://quickstart.confluent.io:9093
-      KAFKA_SSL_KEYSTORE_FILENAME: kafka.broker3.keystore.jks
-      KAFKA_SSL_KEYSTORE_CREDENTIALS: broker3_keystore_creds
-      KAFKA_SSL_KEY_CREDENTIALS: broker3_sslkey_creds
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka3.keystore.jks
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka3_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka3_sslkey_creds
       KAFKA_SSL_CLIENT_AUTH: requested
-      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.broker3.truststore.jks
-      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: broker3_truststore_creds
-      KAFKA_METRICS_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "quickstart.confluent.io:9093"
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka3.truststore.jks
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka3_truststore_creds
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "quickstart.confluent.io:39094"
+      CONFLUENT_METRICS_REPORTER_SECURITY_PROTOCOL: SASL_SSL
+      CONFLUENT_METRICS_REPORTER_SASL_JAAS_CONFIG: com.sun.security.auth.module.Krb5LoginModule required \
+         useKeyTab=true \
+         storeKey=true \
+         keyTab="/etc/kafka/secrets/saslproducer.keytab" \
+         principal="saslproducer/quickstart.confluent.io@TEST.CONFLUENT.IO";
+      CONFLUENT_METRICS_REPORTER_SASL_MECHANISM: GSSAPI
+      CONFLUENT_METRICS_REPORTER_SASL_KERBEROS_SERVICE_NAME: kafka
+      CONFLUENT_METRICS_REPORTER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/client.truststore.jks
+      CONFLUENT_METRICS_REPORTER_SSL_TRUSTSTORE_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/client.keystore.jks
+      CONFLUENT_METRICS_REPORTER_SSL_KEYSTORE_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_SSL_KEY_PASSWORD: confluent
+      CONFLUENT_METRICS_REPORTER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 3
+      CONFLUENT_METRICS_REPORTER_MAX_REQUEST_SIZE: 10485760
+      # To avoid race condition with control-center
+      CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: "false"
       KAKFA_AUTHORIZER_CLASS_NAME: kafka.security.auth.SimpleAclAuthorizer
       KAFKA_SUPER_USERS: User:kafka
       KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SASL_SSL
@@ -172,7 +229,7 @@ services:
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: " "
       KAFKA_SASL_ENABLED_MECHANISMS: GSSAPI
       KAFKA_SASL_KERBEROS_SERVICE_NAME: kafka
-      KAFKA_LOG4J_ROOT_LOGLEVEL: DEBUG
+#      KAFKA_LOG4J_ROOT_LOGLEVEL: DEBUG
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker3_jaas.conf
         -Djava.security.krb5.conf=/etc/kafka/secrets/krb.conf
     volumes:
@@ -180,6 +237,7 @@ services:
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:$TAG
+    hostname: control-center
     network_mode: host
     restart: always
     depends_on:
@@ -203,16 +261,16 @@ services:
       CONTROL_CENTER_STREAMS_SECURITY_PROTOCOL: SASL_SSL
       CONTROL_CENTER_STREAMS_SASL_MECHANISM: GSSAPI
       CONTROL_CENTER_STREAMS_SASL_KERBEROS_SERVICE_NAME: kafka
-      CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.control-center.truststore.jks
+      CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/control-center.truststore.jks
       CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_PASSWORD: confluent
-      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.control-center.keystore.jks
+      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/control-center.keystore.jks
       CONTROL_CENTER_STREAMS_SSL_KEYSTORE_PASSWORD: confluent
       CONTROL_CENTER_STREAMS_SSL_KEY_PASSWORD: confluent
       CONTROL_CENTER_STREAMS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: " "
       CONTROL_CENTER_REST_LISTENERS: "http://0.0.0.0:9021,https://0.0.0.0:9022"
-      CONTROL_CENTER_REST_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.control-center.truststore.jks
+      CONTROL_CENTER_REST_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/control-center.truststore.jks
       CONTROL_CENTER_REST_SSL_TRUSTSTORE_PASSWORD: confluent
-      CONTROL_CENTER_REST_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.control-center.keystore.jks
+      CONTROL_CENTER_REST_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/control-center.keystore.jks
       CONTROL_CENTER_REST_SSL_KEYSTORE_PASSWORD: confluent
       CONTROL_CENTER_REST_SSL_KEY_PASSWORD: confluent
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/producer_jaas.conf
@@ -220,5 +278,9 @@ services:
         -Dsun.security.krb5.debug=true
       CONTROL_CENTER_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/producer_jaas.conf
         -Djava.security.krb5.conf=/etc/kafka/secrets/krb.conf
+        -Djavax.net.ssl.trustStore=/etc/kafka/secrets/control-center.truststore.jks
+        -Djavax.net.ssl.trustStorePassword=confluent
+        -Djavax.net.ssl.keyStore=/etc/kafka/secrets/control-center.keystore.jks
+        -Djavax.net.ssl.keyStorePassword=confluent
       
 

@@ -1,11 +1,6 @@
-# Kerberos image needs to be manually built
-Run in kerberos folder
-docker build -t confluentinc/cp-kerberos:5.1.0 kerberos
+This cluster has 3 zookeepers, 3 brokers, 1 control center with SASL_SSL using kerberos
 
-# Create kerberos container
-docker-compose create
+* Metrics reporter enabled
 
-# Start all containers
-docker-compose start
 
 
