@@ -22,9 +22,9 @@ services:
       ZOOKEEPER_SYNC_LIMIT: 2
       ZOOKEEPER_SERVERS: zookeeper-dest:2888:3888
 
-  kafka-src-1:
+  kafka-src:
     image: confluentinc/cp-enterprise-kafka:$TAG
-    hostname: kafka-src-1
+    hostname: kafka-src
     depends_on:
       - zookeeper-src
     environment:
@@ -32,11 +32,11 @@ services:
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-src:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-src-1:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-src:9092
 
-  kafka-dest-1:
+  kafka-dest:
     image: confluentinc/cp-enterprise-kafka:$TAG
-    hostname: kafka-dest-1
+    hostname: kafka-dest
     depends_on:
       - zookeeper-dest
     environment:
@@ -44,7 +44,7 @@ services:
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-dest:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-dest-1:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-dest:9092
 
   connect:
     image: confluentinc/cp-enterprise-replicator:$TAG
@@ -52,14 +52,13 @@ services:
     restart: on-failure:3
     ports:
       - "8082:8082"
-      - "28082:28082"
     depends_on:
       - zookeeper-dest
-      - kafka-dest-1
+      - kafka-dest
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: "kafka-dest-1:9092"
+      CONNECT_BOOTSTRAP_SERVERS: "kafka-dest:9092"
       CONNECT_GROUP_ID: "connect"
-      CONNECT_REST_PORT: 28082
+      CONNECT_REST_PORT: 8082
       CONNECT_CONFIG_STORAGE_TOPIC: connect-config
       CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
       CONNECT_STATUS_STORAGE_TOPIC: connect-status
