@@ -1,0 +1,29 @@
+version: '3'
+services:
+  zookeeper:
+    build: ./zookeeper
+    image: onprem/zookeeper:5.2.1
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+      
+  kafka:
+    build: ./kafka
+    image: onprem/kafka:5.2.1
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+
+  control-center:
+    build: ./control-center
+    image: onprem/control-center:5.2.1
+    hostname: control-center
+    container_name: control-center
+    depends_on:
+      - kafka
+    ports:
+      - "9021:9021"
