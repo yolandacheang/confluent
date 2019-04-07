@@ -18,6 +18,16 @@ services:
     ports:
       - "9092:9092"
 
+  connect:
+    build: ./connect
+    image: onprem/connect:5.2.1
+    hostname: connect
+    container_name: connect
+    depends_on:
+      - kafka
+    ports:
+      - "8083:8083"
+
   control-center:
     build: ./control-center
     image: onprem/control-center:5.2.1
@@ -27,3 +37,5 @@ services:
       - kafka
     ports:
       - "9021:9021"
+
+  
