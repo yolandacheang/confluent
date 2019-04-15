@@ -18,5 +18,5 @@ COPY connect-log4j.properties /etc/kafka/connect-log4j.properties
 
 EXPOSE 8083
 
-ENV CLASSPATH="/usr/share/java/*"
+ENV CLASSPATH="/usr/share/java/*,/usr/share/confluent-hub-components"
 CMD connect-distributed /etc/kafka/connect-distributed.properties
