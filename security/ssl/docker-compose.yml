@@ -55,10 +55,10 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper1:22181,zookeeper2:32181,zookeeper3:42181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SSL:SSL,PLAINTEXT:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: SSL://kafka1:19092,PLAINTEXT://kafka1:9092
-      KAFKA_SSL_KEYSTORE_FILENAME: kafka.kafka1.keystore.jks
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka1.keystore.jks
       KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka1_keystore_creds
       KAFKA_SSL_KEY_CREDENTIALS: kafka1_sslkey_creds
-      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka1.truststore.jks
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka1.keystore.jks
       KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka1_truststore_creds
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
       KAFKA_SSL_CLIENT_AUTH: required
@@ -83,10 +83,10 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper1:22181,zookeeper2:32181,zookeeper3:42181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SSL:SSL,PLAINTEXT:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: SSL://kafka2:19093,PLAINTEXT://kafka2:9092
-      KAFKA_SSL_KEYSTORE_FILENAME: kafka.kafka2.keystore.jks
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka2.keystore.jks
       KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka2_keystore_creds
       KAFKA_SSL_KEY_CREDENTIALS: kafka2_sslkey_creds
-      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka2.truststore.jks
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka2.keystore.jks
       KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka2_truststore_creds
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
       KAFKA_SSL_CLIENT_AUTH: required
@@ -111,10 +111,10 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper1:22181,zookeeper2:32181,zookeeper3:42181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SSL:SSL,PLAINTEXT:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: SSL://kafka3:19094,PLAINTEXT://kafka3:9092
-      KAFKA_SSL_KEYSTORE_FILENAME: kafka.kafka3.keystore.jks
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka3.keystore.jks
       KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka3_keystore_creds
       KAFKA_SSL_KEY_CREDENTIALS: kafka3_sslkey_creds
-      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka3.truststore.jks
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka3.keystore.jks
       KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka3_truststore_creds
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
       KAFKA_SSL_CLIENT_AUTH: required
@@ -123,6 +123,38 @@ services:
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka3:9092"
     volumes:
       - ${PWD}/secrets:/etc/kafka/secrets
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:$TAG
+    container_name: schema-registry
+    hostname: schema-registry
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    ports:
+      - "8085:8085"
+    volumes:
+      - ${PWD}/secrets:/etc/kafka/secrets
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "SSL://kafka1:19092,SSL://kafka2:19093,SSL://kafka3:19094"
+      SCHEMA_REGISTRY_LISTENERS: "https://0.0.0.0:8085"
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SSL
+      SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/schemaregistry.truststore.jks
+      SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: confluent
+      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/schemaregistry.keystore.jks
+      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_PASSWORD: confluent
+      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEY_PASSWORD: confluent
+      SCHEMA_REGISTRY_KAFKASTORE_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      SCHEMA_REGISTRY_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/schemaregistry.truststore.jks
+      SCHEMA_REGISTRY_SSL_TRUSTSTORE_PASSWORD: confluent
+      SCHEMA_REGISTRY_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/schemaregistry.keystore.jks
+      SCHEMA_REGISTRY_SSL_KEYSTORE_PASSWORD: confluent
+      SCHEMA_REGISTRY_SSL_KEY_PASSWORD: confluent
+      SCHEMA_REGISTRY_SSL_CLIENT_AUTH: "false"
+      SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: "https"
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:$TAG
@@ -149,16 +181,18 @@ services:
       CONTROL_CENTER_COMMAND_TOPIC_REPLICATION: 3
       CONTROL_CENTER_METRICS_TOPIC_REPLICATION: 3
       CONTROL_CENTER_STREAMS_SECURITY_PROTOCOL: SSL
-      CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.control-center.truststore.jks
+      CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/control-center.truststore.jks
       CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_PASSWORD: confluent
-      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.control-center.keystore.jks
+      CONTROL_CENTER_STREAMS_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/control-center.keystore.jks
       CONTROL_CENTER_STREAMS_SSL_KEYSTORE_PASSWORD: confluent
       CONTROL_CENTER_STREAMS_SSL_KEY_PASSWORD: confluent
       CONTROL_CENTER_STREAMS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: " "
       CONTROL_CENTER_REST_LISTENERS: "http://0.0.0.0:9021,https://0.0.0.0:9022"
-      CONTROL_CENTER_REST_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.control-center.truststore.jks
+      CONTROL_CENTER_REST_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/control-center.truststore.jks
       CONTROL_CENTER_REST_SSL_TRUSTSTORE_PASSWORD: confluent
-      CONTROL_CENTER_REST_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.control-center.keystore.jks
+      CONTROL_CENTER_REST_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/control-center.keystore.jks
       CONTROL_CENTER_REST_SSL_KEYSTORE_PASSWORD: confluent
       CONTROL_CENTER_REST_SSL_KEY_PASSWORD: confluent
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: "https://schema-registry:8085"
+
 
