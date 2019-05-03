@@ -1,0 +1,50 @@
+version: '3'
+services:
+  zookeeper-src:
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper-src
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper-src:2888:3888
+
+  zookeeper-dest:
+    image: confluentinc/cp-zookeeper:$TAG
+    hostname: zookeeper-dest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper-dest:2888:3888
+
+  kafka-src:
+    image: confluentinc/cp-enterprise-kafka:$TAG
+    hostname: kafka-src
+    depends_on:
+      - zookeeper-src
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-src:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-src:9092
+
+  kafka-dest:
+    image: confluentinc/cp-enterprise-kafka:$TAG
+    hostname: kafka-dest
+    depends_on:
+      - zookeeper-dest
+    volumes:
+      - $PWD/config:/config
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-dest:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-dest:9092
+
