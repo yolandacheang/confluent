@@ -18,6 +18,30 @@ services:
     ports:
       - "9092:9092"
 
+  schema-registry:
+    build: ./schema-registry
+    image: onprem/schema-registry:5.2.1
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - kafka
+      - zookeeper
+    ports:
+      - "8081:8081"
+
+  connect:
+    build: ./connect
+    image: onprem/connect:5.2.1
+    hostname: connect
+    container_name: connect
+    depends_on:
+      - kafka
+      - schema-registry
+    ports:
+      - "8083:8083"
+    environment:
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.2.1.jar
+
   control-center:
     build: ./control-center
     image: onprem/control-center:5.2.1
@@ -27,3 +51,16 @@ services:
       - kafka
     ports:
       - "9021:9021"
+
+  ksql-server:
+    build: ./ksql-server
+    image: onprem/ksql-server:5.2.1
+    hostname: ksql-server
+    container_name: ksql-server
+    depends_on:
+      - kafka
+    ports:
+      - "8088:8088"
+    volumes:
+      - $PWD/scripts:/scripts
+
