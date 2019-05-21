@@ -124,6 +124,46 @@ services:
     volumes:
       - ${PWD}/secrets:/etc/kafka/secrets
 
+  rest-proxy:
+    image: confluentinc/cp-kafka-rest:$TAG
+    container_name: rest-proxy
+    hostname: rest-proxy
+    restart: always
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+      - schema-registry
+    volumes:
+      - $PWD/secrets:/etc/kafka/secrets
+    ports:
+      - "8082:8082"
+    environment:
+      KAFKA_REST_HOST_NAME: rest-proxy
+      KAFKA_REST_BOOTSTRAP_SERVERS: "SSL://kafka1:19092,SSL://kafka2:19093,SSL://kafka3:19094"
+      KAFKA_REST_LISTENERS: "https://0.0.0.0:8082"
+      KAFKA_REST_SCHEMA_REGISTRY_URL: "https://schema-registry:8085"
+      KAFKA_REST_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/restproxy.truststore.jks
+      KAFKA_REST_SSL_TRUSTSTORE_PASSWORD: confluent
+      KAFKA_REST_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/restproxy.keystore.jks
+      KAFKA_REST_SSL_KEYSTORE_PASSWORD: confluent
+      KAFKA_REST_SSL_KEY_PASSWORD: confluent
+      KAFKA_REST_SSL_CLIENT_AUTH: "false"
+      KAFKA_REST_CLIENT_SECURITY_PROTOCOL: SSL
+      KAFKA_REST_CLIENT_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/restproxy.truststore.jks
+      KAFKA_REST_CLIENT_SSL_TRUSTSTORE_PASSWORD: confluent
+      KAFKA_REST_CLIENT_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/restproxy.keystore.jks
+      KAFKA_REST_CLIENT_SSL_KEYSTORE_PASSWORD: confluent
+      KAFKA_REST_CLIENT_SSL_KEY_PASSWORD: confluent
+      KAFKAREST_OPTS: -Djavax.net.ssl.trustStore=/etc/kafka/secrets/client.truststore.jks
+                  -Djavax.net.ssl.trustStorePassword=confluent
+                  -Djavax.net.ssl.keyStore=/etc/kafka/secrets/client.keystore.jks
+                  -Djavax.net.ssl.keyStorePassword=confluent
+      SCHEMA_REGISTRY_OPTS: -Djavax.net.ssl.trustStore=/etc/kafka/secrets/client.truststore.jks
+                  -Djavax.net.ssl.trustStorePassword=confluent
+                  -Djavax.net.ssl.keyStore=/etc/kafka/secrets/client.keystore.jks
+                  -Djavax.net.ssl.keyStorePassword=confluent
+
   schema-registry:
     image: confluentinc/cp-schema-registry:$TAG
     container_name: schema-registry
