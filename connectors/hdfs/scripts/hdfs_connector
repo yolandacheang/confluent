@@ -1,0 +1,15 @@
+curl -i -X POST \
+    -H "Accept:application/json" \
+    -H  "Content-Type:application/json" \
+   http://localhost:8083/connectors/ -d '
+  {
+      "name": "hdfs-connector",
+      "config": {
+           "connector.class": "io.confluent.connect.hdfs.HdfsSinkConnector",
+           "tasks.max": "1",
+           "topics": "test_hdfs",
+           "hdfs.url": "hdfs://hadoop-namenode:8020",
+           "flush.size": "3",
+           "name": "hdfs-connector"
+       }
+   }'
