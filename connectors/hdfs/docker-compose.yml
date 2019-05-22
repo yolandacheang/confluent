@@ -58,6 +58,10 @@ services:
       - kafka
     ports:
       - "8083:8083"
+    volumes:
+      - $PWD/data:/data
+      - $PWD/error:/error
+      - $PWD/finished:/finished
     environment:
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.2.1.jar
 

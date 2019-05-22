@@ -11,8 +11,10 @@ RUN yum install -y confluent-hub-client
 RUN yum install -y confluent-control-center
 RUN yum install -y confluent-schema-registry
 
-##installs datagen connector
+##installs hdfs connector
 RUN confluent-hub install --no-prompt confluentinc/kafka-connect-hdfs:5.2.1
+
+RUN confluent-hub install --no-prompt jcustenborder/kafka-connect-spooldir:latest
 
 COPY connect-distributed.properties /etc/kafka/connect-distributed.properties
 COPY connect-log4j.properties /etc/kafka/connect-log4j.properties
