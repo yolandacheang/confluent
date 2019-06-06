@@ -1,0 +1,20 @@
+curl -i -X POST -H "Accept:application/json" \
+    -H  "Content-Type:application/json" http://localhost:8083/connectors/ \
+    -d '{
+      "name": "ibmmq-source-connector",
+      "config": {
+          "connector.class": "io.confluent.connect.ibm.mq.IbmMQSourceConnector",
+          "confluent.topic.replication.factor": 1,
+          "kafka.topic":"ibmmq-foobar",
+          "kafka.topic":"MyKafkaTopicName",
+          "mq.hostname":"localhost",
+          "mq.port":"1414",
+          "mq.transport.type":"client",
+          "mq.queue.manager":"QMA",
+          "mq.channel":"SYSTEM.DEF.SVRCONN",
+          "jms.destination.name":"testing",
+          "jms.destination.type":"queue",
+          "confluent.license":"",
+          "confluent.topic.bootstrap.servers":"kafka:9092"
+       }
+    }'
