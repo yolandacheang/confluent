@@ -1,0 +1,57 @@
+---
+version: '3'
+services:
+  connect:
+    image: confluentinc/cp-kafka-connect:$TAG
+    hostname: connect
+    container_name: connect
+    ports:
+      - "8083:8083"
+    environment:
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.2.1.jar
+      CONNECT_BOOTSTRAP_SERVERS: "pkc-4v8zl.ap-southeast-2.aws.confluent.cloud:9092"
+      CONNECT_REST_PORT: 8083
+      CONNECT_LISTENERS: "http://0.0.0.0:8083"
+      CONNECT_GROUP_ID: "connect-cluster"
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-config
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offset
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
+      CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_PLUGIN_PATH: '/usr/share/java'
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
+      CONNECT_SASL_MECHANISM: PLAIN
+      CONNECT_REQUEST_TIMEOUT_MS: 20000
+      CONNECT_RETRY_BACKOFF_MS: 500
+      CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required \
+          username="api-key" password="api-secret";
+      CONNECT_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
+      CONNECT_CONSUMER_SASL_MECHANISM: PLAIN
+      CONNECT_CONSUMER_REQUEST_TIMEOUT_MS: 20000
+      CONNECT_CONSUMER_RETRY_BACKOFF_MS: 500
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required \
+          username="api-key" password="api-secret";
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
+      CONNECT_PRODUCER_SASL_MECHANISM: PLAIN
+      CONNECT_PRODUCER_REQUEST_TIMEOUT_MS: 20000
+      CONNECT_PRODUCER_RETRY_BACKOFF_MS: 500
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required \
+          username="api-key" password="api-secret";
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
+
+
