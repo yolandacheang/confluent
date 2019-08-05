@@ -34,6 +34,33 @@ services:
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
 
+  connect:
+    image: confluentinc/cp-kafka-connect:$TAG
+    hostname: connect
+    container_name: connect
+    restart: always
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "kafka:9092"
+      CONNECT_GROUP_ID: "connect"
+      CONNECT_LISTENERS: "http://0.0.0.0:8083"
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-config
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
+      CONNECT_PLUGIN_PATH: "/usr/share/java"
+      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+      CONNECT_LOG4J_ROOT_LOGLEVEL: DEBUG
+
   control-center:
     image: confluentinc/cp-enterprise-control-center:$TAG
     restart: always
@@ -51,3 +78,4 @@ services:
       CONTROL_CENTER_COMMAND_TOPIC_REPLICATION: 1
       CONTROL_CENTER_METRICS_TOPIC_REPLICATION: 1
       CONTROL_CENTER_REST_LISTENERS: "http://0.0.0.0:9021"
+      CONTROL_CENTER_CONNECT_CLUSTER: "http://connect:8083"
