@@ -36,22 +36,19 @@ services:
       CONNECT_SASL_MECHANISM: PLAIN
       CONNECT_REQUEST_TIMEOUT_MS: 20000
       CONNECT_RETRY_BACKOFF_MS: 500
-      CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required \
-          username="api-key" password="api-secret";
+      CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$api_key" password="$api_secret";
       CONNECT_SECURITY_PROTOCOL: SASL_SSL
       CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
       CONNECT_CONSUMER_SASL_MECHANISM: PLAIN
       CONNECT_CONSUMER_REQUEST_TIMEOUT_MS: 20000
       CONNECT_CONSUMER_RETRY_BACKOFF_MS: 500
-      CONNECT_CONSUMER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required \
-          username="api-key" password="api-secret";
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$api_key" password="$api_secret";
       CONNECT_CONSUMER_SECURITY_PROTOCOL: SASL_SSL
       CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
       CONNECT_PRODUCER_SASL_MECHANISM: PLAIN
       CONNECT_PRODUCER_REQUEST_TIMEOUT_MS: 20000
       CONNECT_PRODUCER_RETRY_BACKOFF_MS: 500
-      CONNECT_PRODUCER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required \
-          username="api-key" password="api-secret";
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$api_key" password="$api_secret";
       CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
 
 
