@@ -1,0 +1,18 @@
+docker-compose exec connect curl  -XPOST -H "Content-Type: application/json; charset=UTF-8" http://localhost:8083/connectors/ -d '
+{
+    "name": "s3-source-connector",
+    "config": {
+        "connector.class": "io.confluent.connect.s3.source.S3SourceConnector",
+        "s3.bucket.name": "cdc",
+        "store.url": "http://minio:9000",
+        "storage.class": "io.confluent.connect.s3.storage.S3Storage",
+        "partitioner.class": "io.confluent.connect.storage.partitioner.DefaultPartitioner",
+        "name": "s3-source-connector",
+        "confluent.topic.bootstrap.servers": "kafka:9092",
+        "confluent.topic.replication.factor": "1",
+        "format.class":"io.confluent.connect.s3.format.bytearray.ByteArrayFormat",
+        "schema.generator.class": "io.confluent.connect.storage.hive.schema.DefaultSchemaGenerator",
+        "schema.compatibility": "NONE",
+        "confluent.license": ""
+    }
+}'
