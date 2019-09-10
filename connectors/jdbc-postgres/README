@@ -1,0 +1,7 @@
+1. Start everything up
+`docker-compose up -d`
+
+2. Start the jdbc source connector 
+./jdbc-connector
+
+3. You will see messages produced to topic jdbctest
