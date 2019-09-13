@@ -24,7 +24,7 @@ from authorizer log
 [2019-09-13 01:11:18,935] INFO Principal = User:client is Denied Operation = Describe from host = 172.27.0.1 on resource = Topic:LITERAL:test (kafka.authorizer.logger)
 ```
 
-4. Create ACL to allow only read to the topic on User:client
+4. Create ACL to allow describe and write to the topic for User:client
 ```
 kafka-acls --authorizer-properties zookeeper.connect=localhost:2181 --add --allow-principal User:client --operation Describe --operation Write --topic test
 ```
