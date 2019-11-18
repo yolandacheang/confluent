@@ -21,7 +21,7 @@ $ docker-compose exec kafka-src bash -c "seq 1000 | kafka-console-producer --req
 
 4. Check the status of the connector
 ```
-root@connect:/# curl -X GET http://localhost:28082/connectors/foo-replicator/status
+root@connect:/# curl -X GET http://localhost:8082/connectors/foo-replicator/status
 {"name":"foo-replicator","connector":{"state":"RUNNING","worker_id":"localhost:28082"},"tasks":[{"state":"RUNNING","id":0,"worker_id":"localhost:28082"}],"type":"source"}
 ```
 
