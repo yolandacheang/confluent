@@ -1,0 +1,59 @@
+version: '3.4'
+services:
+  ldap:
+    image: osixia/openldap:1.2.3
+    hostname: ldap
+    container_name: ldap
+    environment:
+      LDAP_ORGANISATION: "Confluent"
+      LDAP_DOMAIN: "confluent.io"
+    ports:
+      - "389:389"
+      - "636:636"
+    volumes:
+      - "$PWD/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom"
+    command: "--copy-service"
+
+  zookeeper:
+    build: ./zookeeper
+    image: onprem/zookeeper:5.3.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    volumes:
+      - $PWD/security:/security
+    environment:
+      KAFKA_OPTS: -Djava.security.auth.login.config=/security/zookeeper_jaas.conf
+         -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+         -Dzookeeper.requireClientAuthScheme=sasl
+
+  acl-ldap-authorizer:
+    image: customised/acl-ldap-authorizer:1.0
+    build: ./acl
+    hostname: acl
+    container_name: acl
+    depends_on:
+      - zookeeper
+    volumes:
+      - $PWD/security:/security
+    environment:
+      KAFKA_OPTS: -Djava.security.auth.login.config=/security/kafka_jaas.conf
+      
+  kafka:
+    build: ./kafka
+    image: onprem/kafka:5.3.0
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    volumes:
+      - $PWD/plugins:/plugins
+      - $PWD/security:/security
+    ports:
+      - "9092:9092"
+    environment:
+      CLASSPATH: /plugins/ldap-plugins-5.1.0.jar
+      KAFKA_OPTS: -Djava.security.auth.login.config=/security/kafka_jaas.conf
+  
+

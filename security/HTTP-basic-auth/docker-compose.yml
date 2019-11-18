@@ -1,0 +1,74 @@
+version: '3.4'
+services:
+  zookeeper:
+    build: ./zookeeper
+    image: onprem/zookeeper:5.2.1
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+      
+  kafka:
+    build: ./kafka
+    image: onprem/kafka:5.2.1
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+
+  schema-registry:
+    build: ./schema-registry
+    image: onprem/schema-registry:5.2.1
+    restart: on-failure:3
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - kafka
+      - zookeeper
+    volumes:
+      - $PWD/secrets:/secrets
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_OPTS: -Djava.security.auth.login.config=/secrets/schema_registry_jaas.conf
+
+  connect:
+    build: ./connect
+    image: onprem/connect:5.2.1
+    hostname: connect
+    container_name: connect
+    restart: on-failure:3
+    depends_on:
+      - kafka
+      - schema-registry
+    ports:
+      - "8083:8083"
+    environment:
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.2.1.jar
+
+  control-center:
+    build: ./control-center
+    image: onprem/control-center:5.2.1
+    hostname: control-center
+    container_name: control-center
+    restart: on-failure:3
+    depends_on:
+      - kafka
+    ports:
+      - "9021:9021"
+
+  ksql-server:
+    build: ./ksql-server
+    image: onprem/ksql-server:5.2.1
+    hostname: ksql-server
+    container_name: ksql-server
+    restart: on-failure:3
+    depends_on:
+      - kafka
+    ports:
+      - "8088:8088"
+    volumes:
+      - $PWD/scripts:/scripts
+
