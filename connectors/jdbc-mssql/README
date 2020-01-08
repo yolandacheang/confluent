@@ -1,0 +1,42 @@
+1. Start everything up
+`docker-compose up -d`
+
+2. Start the jdbc source connector 
+```
+./jdbc-source-connector
+```
+
+3. You will see messages produced to topic jdbctest
+
+4. Create database kafka on SQL server, install sql cli from node.js
+https://www.quackit.com/sql_server/mac/install_sql-cli_on_a_mac.cfm
+```
+create database kafka;
+```
+5. verify database is created
+```
+SELECT name FROM master.dbo.sysdatabases;
+```
+
+
+
+6. start jdbc sink connector to consume messages and insert into SQL server
+```
+./jdbc-sink-connector
+```
+
+the connector should create the table and schemas, you can verify on the sql server side
+
+USE kafka;
+
+View the tables
+```
+select * from INFORMATION_SCHEMA.TABLES;
+```
+
+View the data
+```
+select * from kafka_jdbctest;
+```
+
+
